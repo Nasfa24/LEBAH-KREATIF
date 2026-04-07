@@ -215,7 +215,11 @@
                         <option value="e-Wallet Dana">e-Wallet Dana</option><option value="e-Wallet ShoppeePay">e-Wallet ShoppeePay</option>
                     </select>
                     <label class="form-label">Nomor Rekening</label><input type="number" id="userBankNum" class="form-input" placeholder="Nomor Rekening">
-                    <button class="btn-submit" onclick="saveProfile()" style="background:var(--text-main); color:white;"><i class="fas fa-save"></i> Simpan Perubahan</button>
+                    
+                    <button class="btn-submit" onclick="saveProfile()" style="background:var(--text-main); color:white;">
+                        <i class="fas fa-save"></i> Simpan Perubahan
+                    </button>
+                    
                 </div>
                 <div style="margin-top:30px; border-top:1px solid #eee; padding-top:20px;">
                     <div onclick="requestLogout()" style="color: var(--danger); font-weight:600; cursor:pointer; background:#FFEBEE; padding:15px; border-radius:12px;"><i class="fas fa-sign-out-alt"></i> KELUAR (LOGOUT)</div>
@@ -352,12 +356,41 @@
             });
         }
 
+        // --- FUNGSI SAVE PROFILE YANG DIPERBAIKI ---
         function saveProfile() {
-            const nik = document.getElementById('userNIK').value; const wa = document.getElementById('userWA').value; const bank = document.getElementById('userBankName').value; const num = document.getElementById('userBankNum').value;
+            const nik = document.getElementById('userNIK').value; 
+            const wa = document.getElementById('userWA').value; 
+            const bank = document.getElementById('userBankName').value; 
+            const num = document.getElementById('userBankNum').value;
+            
             if(!nik || !wa || !bank || !num) return showToast("Semua data wajib diisi!");
-            db.collection("users").doc(currentUser.uid).update({ nik: nik, whatsapp: wa, bankName: bank, bankNumber: num, lastUpdated: firebase.firestore.FieldValue.serverTimestamp() })
-            .then(() => { showToast("Profil disimpan!"); toggleModal('profileModal', false); });
+            
+            const btn = event.currentTarget || event.srcElement;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
+            btn.disabled = true;
+
+            db.collection("users").doc(currentUser.uid).update({ 
+                nik: nik, 
+                whatsapp: wa, 
+                bankName: bank, 
+                bankNumber: num, 
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp() 
+            })
+            .then(() => { 
+                showToast("Profil berhasil disimpan!"); 
+                toggleModal('profileModal', false);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            })
+            .catch(error => {
+                alert("GAGAL MENYIMPAN:\n" + error.message);
+                console.error("Error simpan profil:", error);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
         }
+        // -------------------------------------------
 
         function openProfile() { toggleModal('profileModal', true); }
 
@@ -383,7 +416,6 @@
                           reevalBtn = `<div style="margin-top:10px; padding-top:8px; border-top:1px dashed #eee; text-align:right;"><span onclick="triggerReeval('${d.id}')" style="color:var(--danger); font-size:0.75rem; font-weight:600; cursor:pointer; padding:5px 10px; background:#FFEBEE; border-radius:20px;"><i class="fas fa-sync-alt"></i> Ajukan Banding</span></div>`;
                       }
 
-                      // FIX: AUTO KOREKSI LINK RELATIF MENJADI ABSOLUT
                       let validLink = d.link;
                       if (!validLink.match(/^https?:\/\//i)) { validLink = 'https://' + validLink; }
 
@@ -427,7 +459,6 @@
             let link = document.getElementById('inputLink').value.trim(); const platform = document.getElementById('inputPlatform').value;
             if(!link) return showToast("Link tidak boleh kosong!");
             
-            // FIX: TAMBAHKAN HTTPS:// JIKA BELUM ADA SEBELUM MASUK DATABASE
             if (!link.match(/^https?:\/\//i)) { link = 'https://' + link; }
 
             document.getElementById('loadingScreen').style.display = 'flex';
@@ -484,5 +515,5 @@
             });
         }
     </script>
-    </body>
+</body>
 </html>
