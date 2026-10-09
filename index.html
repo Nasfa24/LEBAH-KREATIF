@@ -103,7 +103,8 @@
         
         <div class="auth-box" id="formLogin">
             <h3 style="margin-bottom:20px; color:var(--primary);">Masuk Akun (Gunakan NIK)</h3>
-            <input type="number" id="loginNIK" class="auth-input" placeholder="16 Digit NIK">
+            <!-- KOLOM NIK TERKUNCI 16 DIGIT & HANYA ANGKA -->
+            <input type="text" inputmode="numeric" id="loginNIK" class="auth-input" placeholder="16 Digit NIK" maxlength="16" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <input type="password" id="loginPass" class="auth-input" placeholder="Password">
             <button class="auth-btn" onclick="doLogin()">MASUK</button>
             <div class="auth-link" onclick="toggleAuth('register')">Belum punya akun? Daftar di sini</div>
@@ -113,18 +114,21 @@
             <h3 style="margin-bottom:20px; color:var(--primary); text-align:center;">Daftar Kreator</h3>
             <label style="font-size:0.8rem; font-weight:bold; color:#555; margin-left:5px;">Akun Login</label>
             <input type="text" id="regName" class="auth-input" placeholder="Nama Lengkap">
-            <input type="number" id="regNIK" class="auth-input" placeholder="16 Digit NIK KTP">
+            <!-- KOLOM NIK REGISTRASI TERKUNCI -->
+            <input type="text" inputmode="numeric" id="regNIK" class="auth-input" placeholder="16 Digit NIK KTP" maxlength="16" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <input type="password" id="regPass" class="auth-input" placeholder="Buat Password (Min 6 Karakter)">
             
             <label style="font-size:0.8rem; font-weight:bold; color:#555; margin-left:5px; margin-top:10px; display:block;">Data Pencairan (Wajib)</label>
-            <input type="number" id="regWA" class="auth-input" placeholder="No. WhatsApp (Contoh: 0812...)">
+            <!-- KOLOM WA TERKUNCI -->
+            <input type="text" inputmode="numeric" id="regWA" class="auth-input" placeholder="No. WhatsApp (Contoh: 0812...)" maxlength="15" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <select id="regBankName" class="auth-input" style="color:#555;">
                 <option value="" disabled selected>Pilih Bank / E-Wallet</option>
                 <option value="Bank Mandiri">Bank Mandiri</option><option value="Bank BCA">Bank BCA</option>
                 <option value="Bank BNI">Bank BNI</option><option value="Bank BRI">Bank BRI</option>
                 <option value="e-Wallet Dana">e-Wallet Dana</option><option value="e-Wallet ShoppeePay">e-Wallet ShoppeePay</option>
             </select>
-            <input type="number" id="regBankNum" class="auth-input" placeholder="Nomor Rekening">
+            <!-- KOLOM REKENING TERKUNCI -->
+            <input type="text" inputmode="numeric" id="regBankNum" class="auth-input" placeholder="Nomor Rekening" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
 
             <button class="auth-btn" onclick="doRegister()">DAFTAR SEKARANG</button>
             <div class="auth-link" style="text-align:center;" onclick="toggleAuth('login')">Batal / Kembali ke Login</div>
@@ -184,7 +188,8 @@
             <h2 style="font-size:1.2rem; margin-bottom:5px;">Tarik Tunai</h2>
             <p style="font-size:0.8rem; color:#666; margin-bottom:20px;">Min. 150 Poin (Rp 50.000)</p>
             <label class="form-label">Jumlah Poin</label>
-            <input type="number" id="redeemAmount" class="form-input" placeholder="Minimal 150">
+            <!-- TERKUNCI ANGKA SAJA -->
+            <input type="text" inputmode="numeric" id="redeemAmount" class="form-input" placeholder="Minimal 150" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <div style="background:#F5F7FA; padding:10px; border-radius:8px; margin-top:10px; font-size:0.85rem;">Transfer ke:<br><b id="redeemTarget">...</b></div>
             <button class="btn-submit" style="background:var(--secondary); color:black;" onclick="processRedeem()">Ajukan</button>
             <div style="text-align:center; margin-top:15px; color:#888;" onclick="toggleModal('redeemModal', false)">Batal</div>
@@ -202,7 +207,10 @@
                 <div class="profile-badge" id="badgeVerif" style="background:#E3F2FD; color:#03754c;">Kreator Terverifikasi</div>
                 <div style="text-align:left; margin-top:10px;">
                     <h4 style="color:var(--primary); border-bottom:2px solid #eee; padding-bottom:5px; margin-bottom:15px;">Data Keuangan & Kontak</h4>
-                    <label class="form-label">No. WhatsApp</label><input type="number" id="userWA" class="form-input" placeholder="Contoh: 08123456789">
+                    <label class="form-label">No. WhatsApp</label>
+                    <!-- KOLOM EDIT WA TERKUNCI -->
+                    <input type="text" inputmode="numeric" id="userWA" class="form-input" placeholder="Contoh: 08123456789" maxlength="15" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                    
                     <label class="form-label">Nama Bank / E-Wallet</label>
                     <select id="userBankName" class="form-input">
                         <option value="" disabled selected>Pilih Bank / E-Wallet</option>
@@ -210,7 +218,9 @@
                         <option value="Bank BNI">Bank BNI</option><option value="Bank BRI">Bank BRI</option>
                         <option value="e-Wallet Dana">e-Wallet Dana</option><option value="e-Wallet ShoppeePay">e-Wallet ShoppeePay</option>
                     </select>
-                    <label class="form-label">Nomor Rekening</label><input type="number" id="userBankNum" class="form-input" placeholder="Nomor Rekening">
+                    <label class="form-label">Nomor Rekening</label>
+                    <!-- KOLOM EDIT REKENING TERKUNCI -->
+                    <input type="text" inputmode="numeric" id="userBankNum" class="form-input" placeholder="Nomor Rekening" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                     
                     <button class="btn-submit" onclick="saveProfile()" style="background:var(--text-main); color:white;">
                         <i class="fas fa-save"></i> Simpan Perubahan
@@ -559,7 +569,7 @@
         
         async function processRedeem() {
             const amount = parseInt(document.getElementById('redeemAmount').value); 
-            if(amount < 150) return showToast("Minimal 150 Poin!"); 
+            if(!amount || amount < 150) return showToast("Minimal 150 Poin!"); 
             if(amount > (currentUser.creative_balance || 0)) return showToast("Saldo tidak cukup!");
             
             document.getElementById('loadingScreen').style.display = 'flex';

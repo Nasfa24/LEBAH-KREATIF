@@ -75,7 +75,8 @@
         <h2 style="margin-bottom: 5px;">LEBAH KREATIF ADMIN</h2>
         <p style="margin-bottom: 20px; opacity: 0.8;">Gerbang Kurator</p>
         <div class="login-box">
-            <input type="text" id="adminUser" class="form-input" placeholder="Username">
+            <!-- INPUT USERNAME TERKUNCI HANYA ANGKA -->
+            <input type="text" inputmode="numeric" id="adminUser" class="form-input" placeholder="Username (Nomor HP)" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <input type="password" id="adminPass" class="form-input" placeholder="Password">
             <button class="btn" onclick="checkLogin()">MASUK</button>
             <p id="loginMsg" style="color:red; font-size:0.8rem; margin-top:10px;"></p>
@@ -173,8 +174,9 @@
     <div id="toast" class="toast">Berhasil!</div>
 
     <script>
-const ADMIN_USERNAME = "081339760265";
-const ADMIN_PASSWORD = "glc2026";
+        // KREDENSIAL TERBARU
+        const ADMIN_USERNAME = "081339760265";
+        const ADMIN_PASSWORD = "989898";
         
         // ================= KREDENSIAL SUPABASE =================
         const SUPABASE_URL = "https://hvbrskchlpemypawpqjn.supabase.co/rest/v1";
