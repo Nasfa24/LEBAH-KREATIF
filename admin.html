@@ -18,11 +18,14 @@
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
         .login-box { background: white; padding: 30px; border-radius: 16px; width: 320px; text-align: center; color: #333; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .form-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #eee; border-radius: 8px; font-size: 1rem; outline: none; }
+        .form-input:focus { border-color: var(--primary); }
         .btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
         .btn:active { transform: scale(0.95); }
+        .btn:disabled { background: #888; cursor: not-allowed; }
         .btn-danger { background: var(--danger); }
         .btn-warning { background: #FF9800; color: white; }
         .btn-outline { background: white; color: var(--primary); border: 2px solid var(--primary); }
+        
         #dashboard { display: none; max-width: 1000px; margin: 0 auto; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: white; padding: 20px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .stats-container { display: flex; gap: 15px; margin-bottom: 20px; }
@@ -34,7 +37,7 @@
         
         .tabs-wrapper { overflow-x: auto; white-space: nowrap; margin-bottom: 20px; padding-bottom: 5px; }
         .tabs { display: inline-flex; gap: 10px; }
-        .tab { padding: 10px 20px; background: white; border-radius: 30px; cursor: pointer; font-weight: 600; font-size: 0.9rem; color: #666; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .tab { padding: 10px 20px; background: white; border-radius: 30px; cursor: pointer; font-weight: 600; font-size: 0.9rem; color: #666; box-shadow: 0 2px 5px rgba(0,0,0,0.02); transition: 0.2s; }
         .tab.active { background: var(--primary); color: white; }
         .hidden { display: none; }
         
@@ -78,14 +81,17 @@
             <!-- INPUT USERNAME TERKUNCI HANYA ANGKA -->
             <input type="text" inputmode="numeric" id="adminUser" class="form-input" placeholder="Username (Nomor HP)" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <input type="password" id="adminPass" class="form-input" placeholder="Password">
-            <button class="btn" onclick="checkLogin()">MASUK</button>
-            <p id="loginMsg" style="color:red; font-size:0.8rem; margin-top:10px;"></p>
+            <button class="btn" id="btnLoginBtn" onclick="checkDatabaseLogin()">MASUK</button>
+            <p id="loginMsg" style="color:red; font-size:0.85rem; font-weight:600; margin-top:15px;"></p>
         </div>
     </div>
 
     <div id="dashboard">
         <div class="header">
-            <div><h2 style="color:var(--primary); margin:0;">Ruang Kurasi</h2><div style="font-size:0.8rem; color:#666;">LEBAH KREATIF</div></div>
+            <div>
+                <h2 style="color:var(--primary); margin:0;">Ruang Kurasi</h2>
+                <div style="font-size:0.85rem; color:#666; font-weight:600;"><i class="fas fa-user-circle"></i> Halo, <span id="adminWelcomeName">Kurator</span></div>
+            </div>
             <button onclick="logoutAdmin()" class="btn btn-outline" style="width:auto; padding:8px 15px;"><i class="fas fa-sign-out-alt"></i> Keluar</button>
         </div>
 
@@ -174,10 +180,6 @@
     <div id="toast" class="toast">Berhasil!</div>
 
     <script>
-        // KREDENSIAL TERBARU
-        const ADMIN_USERNAME = "081339760265";
-        const ADMIN_PASSWORD = "989898";
-        
         // ================= KREDENSIAL SUPABASE =================
         const SUPABASE_URL = "https://hvbrskchlpemypawpqjn.supabase.co/rest/v1";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2YnJza2NobHBlbXlwYXdwcWpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MzYzNzksImV4cCI6MjA5MjUxMjM3OX0.0NCroyTHROeQ3SNKOTNZS1H1hxrGy5wGTLGWm5YdOdo"; 
@@ -189,24 +191,63 @@
         window.onload = function() { 
             if (sessionStorage.getItem('gclAdminLoggedIn') === 'true') { 
                 document.getElementById('loginOverlay').style.display = 'none'; 
-                document.getElementById('dashboard').style.display = 'block'; 
+                document.getElementById('dashboard').style.display = 'block';
+                // Tampilkan nama admin jika ada
+                const adminName = sessionStorage.getItem('gclAdminName');
+                if(adminName) document.getElementById('adminWelcomeName').innerText = adminName;
                 initDashboard(); 
             } 
         };
 
-        function checkLogin() { 
-            if(document.getElementById('adminUser').value === ADMIN_USERNAME && document.getElementById('adminPass').value === ADMIN_PASSWORD) { 
-                sessionStorage.setItem('gclAdminLoggedIn', 'true'); 
-                document.getElementById('loginOverlay').style.display = 'none'; 
-                document.getElementById('dashboard').style.display = 'block'; 
-                initDashboard(); 
-            } else { 
-                document.getElementById('loginMsg').innerText = "Username atau Password salah!"; 
-            } 
+        // ================== LOGIN DATABASE MASTER_ADMIN ==================
+        async function checkDatabaseLogin() {
+            const u = document.getElementById('adminUser').value.trim();
+            const p = document.getElementById('adminPass').value;
+            const msg = document.getElementById('loginMsg');
+            const btn = document.getElementById('btnLoginBtn');
+
+            if(!u || !p) {
+                msg.innerText = "Mohon isi Username dan Password!";
+                return;
+            }
+
+            btn.innerText = "Memeriksa...";
+            btn.disabled = true;
+            msg.innerText = "";
+
+            try {
+                // Fetch data dari tabel master_admin berdasarkan input
+                const res = await fetch(`${SUPABASE_URL}/master_admin?username=eq.${u}&password=eq.${p}&select=*`, { headers: headersConfig });
+                const data = await res.json();
+
+                if (data.length > 0) {
+                    // Login Berhasil
+                    sessionStorage.setItem('gclAdminLoggedIn', 'true'); 
+                    sessionStorage.setItem('gclAdminName', data[0].nama_admin); // Ambil nama dari DB
+
+                    document.getElementById('adminWelcomeName').innerText = data[0].nama_admin;
+                    document.getElementById('loginOverlay').style.display = 'none'; 
+                    document.getElementById('dashboard').style.display = 'block'; 
+                    initDashboard(); 
+                } else {
+                    // Login Gagal
+                    msg.innerText = "Data tidak ditemukan. Username atau Password salah!"; 
+                }
+            } catch (error) {
+                msg.innerText = "Gagal terhubung ke database. Periksa koneksi internet Anda.";
+                console.error("Login Error:", error);
+            } finally {
+                btn.innerText = "MASUK";
+                btn.disabled = false;
+            }
         }
 
         function logoutAdmin() { 
-            showDialog("Keluar", "Akhiri sesi Kurator?", () => { sessionStorage.removeItem('gclAdminLoggedIn'); window.location.reload(); }); 
+            showDialog("Keluar", "Akhiri sesi Kurator?", () => { 
+                sessionStorage.removeItem('gclAdminLoggedIn'); 
+                sessionStorage.removeItem('gclAdminName'); 
+                window.location.reload(); 
+            }); 
         }
 
         function initDashboard() { 
@@ -223,7 +264,6 @@
             } catch(e) { console.error("Error stat:", e); }
         }
 
-        // UPDATE SALDO (Fungsi Bantuan untuk Sinkronisasi Poin)
         async function updateUserBalance(nik, deltaPoints) {
             try {
                 let res = await fetch(`${SUPABASE_URL}/master_kader?nik=eq.${nik}&select=creative_balance`, { headers: headersConfig });
@@ -240,14 +280,10 @@
         function deleteSubmission(docId, userNik, pointsAwarded) {
             showDialog("Hapus Permanen", "Yakin ingin menghapus karya ini? Jika karya ini sudah pernah dapat poin, saldo Kreator akan dipotong secara otomatis.", async () => {
                 try {
-                    // Tarik kembali poin jika statusnya pernah approved
                     if(pointsAwarded > 0) { await updateUserBalance(userNik, -pointsAwarded); }
-                    
-                    // Hapus dokumen di Supabase
                     await fetch(`${SUPABASE_URL}/submissions?id=eq.${docId}`, { method: 'DELETE', headers: headersConfig });
-                    
                     showToast("Karya berhasil dihapus!");
-                    initDashboard(); // Refresh tampilan
+                    initDashboard(); 
                 } catch(e) { showDialog("Error", "Gagal menghapus data.", null, true); }
             });
         }
@@ -375,7 +411,6 @@
                         method: 'PATCH', headers: headersConfig, body: JSON.stringify({ status: "transferred" })
                     });
                     
-                    // Ambil nomor WA dari master_kader untuk dihubungi
                     let resWA = await fetch(`${SUPABASE_URL}/master_kader?nik=eq.${userNik}&select=no_whatsapp`, { headers: headersConfig });
                     let dataWA = await resWA.json();
                     
@@ -387,7 +422,7 @@
                     } else {
                         showToast("Status diupdate. Tapi nomor WA Kreator tidak ditemukan.");
                     }
-                    initDashboard(); // Refresh layar
+                    initDashboard(); 
                 } catch(e) { showToast("Gagal update status"); }
             }); 
         }
@@ -437,7 +472,6 @@
             let delta = finalPoints - oldScore;
 
             try {
-                // Update Submissions
                 await fetch(`${SUPABASE_URL}/submissions?id=eq.${currentDocId}`, {
                     method: 'PATCH', headers: headersConfig, 
                     body: JSON.stringify({ 
@@ -448,14 +482,13 @@
                     })
                 });
 
-                // Update Balance di master_kader jika ada selisih
                 if(delta !== 0) {
                     await updateUserBalance(currentUserId, delta);
                 }
 
                 closeModal(); 
                 showToast(`Selesai! Saldo disesuaikan (${delta > 0 ? '+'+delta : delta} Poin).`);
-                initDashboard(); // Auto-refresh layar admin
+                initDashboard(); 
             } catch(e) {
                 showDialog("Error", "Gagal menyimpan penilaian.", null, true);
             } finally {
