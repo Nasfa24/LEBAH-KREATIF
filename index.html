@@ -98,12 +98,14 @@
     <div id="loginScreen">
         <img src="./logo.png" alt="Logo Lebah Kreatif" style="width: 100px; height: 100px; object-fit: contain; margin-bottom: 15px; border-radius: 20px; background: white; padding: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
         
-        <h1 style="margin-bottom:5px; font-size:1.8rem;">LEBAH KREATIF</h1>
+        <!-- ================= BACKDOOR RAHASIA ADMIN ================= -->
+        <h1 style="margin-bottom:5px; font-size:1.8rem;">LEBAH K<span onclick="tapSecret()" style="user-select:none;">R</span>EATIF</h1>
+        <!-- ========================================================== -->
+        
         <p style="opacity:0.8; font-size:0.9rem; margin-bottom:30px;">Platform Kreator Masa Depan</p>
         
         <div class="auth-box" id="formLogin">
             <h3 style="margin-bottom:20px; color:var(--primary);">Masuk Akun (Gunakan NIK)</h3>
-            <!-- KOLOM NIK TERKUNCI 16 DIGIT & HANYA ANGKA -->
             <input type="text" inputmode="numeric" id="loginNIK" class="auth-input" placeholder="16 Digit NIK" maxlength="16" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <input type="password" id="loginPass" class="auth-input" placeholder="Password">
             <button class="auth-btn" onclick="doLogin()">MASUK</button>
@@ -114,12 +116,10 @@
             <h3 style="margin-bottom:20px; color:var(--primary); text-align:center;">Daftar Kreator</h3>
             <label style="font-size:0.8rem; font-weight:bold; color:#555; margin-left:5px;">Akun Login</label>
             <input type="text" id="regName" class="auth-input" placeholder="Nama Lengkap">
-            <!-- KOLOM NIK REGISTRASI TERKUNCI -->
             <input type="text" inputmode="numeric" id="regNIK" class="auth-input" placeholder="16 Digit NIK KTP" maxlength="16" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <input type="password" id="regPass" class="auth-input" placeholder="Buat Password (Min 6 Karakter)">
             
             <label style="font-size:0.8rem; font-weight:bold; color:#555; margin-left:5px; margin-top:10px; display:block;">Data Pencairan (Wajib)</label>
-            <!-- KOLOM WA TERKUNCI -->
             <input type="text" inputmode="numeric" id="regWA" class="auth-input" placeholder="No. WhatsApp (Contoh: 0812...)" maxlength="15" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <select id="regBankName" class="auth-input" style="color:#555;">
                 <option value="" disabled selected>Pilih Bank / E-Wallet</option>
@@ -127,7 +127,6 @@
                 <option value="Bank BNI">Bank BNI</option><option value="Bank BRI">Bank BRI</option>
                 <option value="e-Wallet Dana">e-Wallet Dana</option><option value="e-Wallet ShoppeePay">e-Wallet ShoppeePay</option>
             </select>
-            <!-- KOLOM REKENING TERKUNCI -->
             <input type="text" inputmode="numeric" id="regBankNum" class="auth-input" placeholder="Nomor Rekening" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
 
             <button class="auth-btn" onclick="doRegister()">DAFTAR SEKARANG</button>
@@ -188,7 +187,6 @@
             <h2 style="font-size:1.2rem; margin-bottom:5px;">Tarik Tunai</h2>
             <p style="font-size:0.8rem; color:#666; margin-bottom:20px;">Min. 150 Poin (Rp 50.000)</p>
             <label class="form-label">Jumlah Poin</label>
-            <!-- TERKUNCI ANGKA SAJA -->
             <input type="text" inputmode="numeric" id="redeemAmount" class="form-input" placeholder="Minimal 150" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <div style="background:#F5F7FA; padding:10px; border-radius:8px; margin-top:10px; font-size:0.85rem;">Transfer ke:<br><b id="redeemTarget">...</b></div>
             <button class="btn-submit" style="background:var(--secondary); color:black;" onclick="processRedeem()">Ajukan</button>
@@ -208,7 +206,6 @@
                 <div style="text-align:left; margin-top:10px;">
                     <h4 style="color:var(--primary); border-bottom:2px solid #eee; padding-bottom:5px; margin-bottom:15px;">Data Keuangan & Kontak</h4>
                     <label class="form-label">No. WhatsApp</label>
-                    <!-- KOLOM EDIT WA TERKUNCI -->
                     <input type="text" inputmode="numeric" id="userWA" class="form-input" placeholder="Contoh: 08123456789" maxlength="15" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                     
                     <label class="form-label">Nama Bank / E-Wallet</label>
@@ -219,7 +216,6 @@
                         <option value="e-Wallet Dana">e-Wallet Dana</option><option value="e-Wallet ShoppeePay">e-Wallet ShoppeePay</option>
                     </select>
                     <label class="form-label">Nomor Rekening</label>
-                    <!-- KOLOM EDIT REKENING TERKUNCI -->
                     <input type="text" inputmode="numeric" id="userBankNum" class="form-input" placeholder="Nomor Rekening" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                     
                     <button class="btn-submit" onclick="saveProfile()" style="background:var(--text-main); color:white;">
@@ -255,6 +251,31 @@
     <div id="gclToast" class="gcl-toast"><i class="fas fa-info-circle" style="color:var(--primary); font-size:1.2rem;"></i><div id="toastMsg" style="font-size:0.9rem; font-weight:600;">Notifikasi</div></div>
 
     <script>
+        // ================= SCRIPT TOMBOL RAHASIA =================
+        let secretTapCount = 0;
+        let secretTapTimer;
+        
+        function tapSecret() {
+            secretTapCount++;
+            clearTimeout(secretTapTimer);
+            
+            // Jika jeda antar-tap lebih dari 1.5 detik, hitungan hangus (kembali ke 0)
+            secretTapTimer = setTimeout(() => { secretTapCount = 0; }, 1500);
+            
+            if(secretTapCount === 5) {
+                secretTapCount = 0; // Reset counter
+                setTimeout(() => {
+                    let pin = prompt("Akses Kurator - Masukkan PIN:");
+                    if(pin === "989898") {
+                        window.location.href = "./admin.html"; 
+                    } else if (pin) {
+                        showToast("Akses Ditolak.");
+                    }
+                }, 100);
+            }
+        }
+        // =========================================================
+
         // ================= KREDENSIAL SUPABASE =================
         const SUPABASE_URL = "https://hvbrskchlpemypawpqjn.supabase.co/rest/v1";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2YnJza2NobHBlbXlwYXdwcWpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MzYzNzksImV4cCI6MjA5MjUxMjM3OX0.0NCroyTHROeQ3SNKOTNZS1H1hxrGy5wGTLGWm5YdOdo"; 
