@@ -132,11 +132,10 @@
                 Link: <a href="#" id="calcLink" target="_blank" style="color:blue;">Buka Postingan Asli</a>
             </div>
 
-            <label style="font-size:0.8rem; font-weight:bold; color:#666;">Engagement Baru:</label>
-            <div class="calc-grid">
-                <div><small>Views</small><input type="number" id="c_views" class="form-input" placeholder="0" oninput="liveCalc()"></div>
-                <div><small>Likes</small><input type="number" id="c_likes" class="form-input" placeholder="0" oninput="liveCalc()"></div>
-                <div><small>Comments</small><input type="number" id="c_comments" class="form-input" placeholder="0" oninput="liveCalc()"></div>
+            <label style="font-size:0.8rem; font-weight:bold; color:#666;">Engagement (Otomatis dari Scraping):</label>
+            <div class="calc-grid" style="grid-template-columns: 1fr 1fr;">
+                <div><small>Likes</small><div id="c_likes_display" class="form-input" style="text-align:center; font-weight:800; font-size:1.4rem; background:#f0fdf4; color:#03754c;">0</div></div>
+                <div><small>Comments</small><div id="c_comments_display" class="form-input" style="text-align:center; font-weight:800; font-size:1.4rem; background:#f0fdf4; color:#03754c;">0</div></div>
             </div>
 
             <div id="critArea">
@@ -189,6 +188,7 @@
         const countHeaders = { ...headersConfig, 'Prefer': 'count=exact' };
 
         let currentDocId = null; let currentUserId = null; let oldScore = 0;
+        let globalScrapedLikes = 0; let globalScrapedComments = 0;
         let activeMultiplier = 0; let currentCalculatedMultiplier = 0;
 
         window.onload = async function() { 
@@ -357,7 +357,7 @@
                             <div style="display:flex; flex-direction:column; gap:8px; min-width:140px;">
                                 <button class="btn btn-warning" style="padding:8px; font-size:0.85rem;" onclick="auditWA('${d.user_nik}', '${validLink}')"><i class="fab fa-whatsapp"></i> Audit via WA</button>
                                 <div style="display:flex; gap:8px;">
-                                    <button class="btn" style="padding:8px; flex:1; font-size:0.85rem;" onclick="openCalc('${d.id}', '${d.user_nik}', '${d.user_name}', '${validLink}', ${d.points_awarded || 0}, ${mul})">Nilai</button>
+                                    <button class="btn" style="padding:8px; flex:1; font-size:0.85rem;" onclick="openCalc('${d.id}', '${d.user_nik}', '${d.user_name}', '${validLink}', ${d.points_awarded || 0}, ${mul}, ${d.scraped_likes || 0}, ${d.scraped_comments || 0})">Nilai</button>
                                     <button class="btn btn-danger" style="padding:8px; width:45px; flex:none;" onclick="deleteSubmission('${d.id}', '${d.user_nik}', ${d.points_awarded || 0})" title="Hapus Karya"><i class="fas fa-trash"></i></button>
                                 </div>
                             </div>
@@ -401,7 +401,7 @@
                                 <a href="${validLink}" target="_blank" style="font-size:0.8rem; color:#1976D2; text-decoration:none;"><i class="fas fa-link"></i> Buka Konten</a>
                             </div>
                             <div style="display:flex; gap:5px; align-items:center;">
-                                <button class="btn btn-outline" style="width:auto; padding:5px 10px; font-size:0.8rem;" onclick="openCalc('${d.id}', '${d.user_nik}', '${d.user_name}', '${validLink}', ${d.points_awarded || 0}, ${mul})"><i class="fas fa-edit"></i> Edit Nilai</button>
+                                <button class="btn btn-outline" style="width:auto; padding:5px 10px; font-size:0.8rem;" onclick="openCalc('${d.id}', '${d.user_nik}', '${d.user_name}', '${validLink}', ${d.points_awarded || 0}, ${mul}, ${d.scraped_likes || 0}, ${d.scraped_comments || 0})"><i class="fas fa-edit"></i> Edit Nilai</button>
                                 <button class="btn btn-danger" style="width:auto; padding:5px 10px; font-size:0.8rem;" onclick="deleteSubmission('${d.id}', '${d.user_nik}', ${d.points_awarded || 0})" title="Hapus Permanen"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>`;
@@ -462,9 +462,12 @@
             }); 
         }
 
-        function openCalc(docId, userId, userName, link, currentPts, savedMult = 0) {
+        function openCalc(docId, userId, userName, link, currentPts, savedMult = 0, scrapedLikes = 0, scrapedComments = 0) {
             currentDocId = docId; currentUserId = userId; oldScore = currentPts; activeMultiplier = savedMult;
-            document.getElementById('c_views').value = ''; document.getElementById('c_likes').value = ''; document.getElementById('c_comments').value = '';
+            globalScrapedLikes = scrapedLikes;
+            globalScrapedComments = scrapedComments;
+            document.getElementById('c_likes_display').innerText = scrapedLikes;
+            document.getElementById('c_comments_display').innerText = scrapedComments;
             document.querySelectorAll('.c_crit').forEach(cb => cb.checked = false);
             document.getElementById('calcKreatorName').innerText = userName; document.getElementById('calcLink').href = link;
             
@@ -480,8 +483,8 @@
         function closeModal() { document.getElementById('calcModal').style.display = 'none'; }
 
         function liveCalc() {
-            let v = parseInt(document.getElementById('c_views').value) || 0; let l = parseInt(document.getElementById('c_likes').value) || 0; let c = parseInt(document.getElementById('c_comments').value) || 0;
-            let baseScore = (v * 0.01) + (l * 0.012) + (c * 0.015);
+            let l = globalScrapedLikes || 0; let c = globalScrapedComments || 0;
+            let baseScore = (l * 0.012) + (c * 0.015);
             let m = activeMultiplier;
             const warn = document.getElementById('c_warning');
 
