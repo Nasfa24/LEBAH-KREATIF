@@ -186,6 +186,7 @@
         const SUPABASE_URL = "https://hvbrskchlpemypawpqjn.supabase.co/rest/v1";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2YnJza2NobHBlbXlwYXdwcWpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MzYzNzksImV4cCI6MjA5MjUxMjM3OX0.0NCroyTHROeQ3SNKOTNZS1H1hxrGy5wGTLGWm5YdOdo"; 
         const headersConfig = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+        const countHeaders = { ...headersConfig, 'Prefer': 'count=exact' };
 
         let currentDocId = null; let currentUserId = null; let oldScore = 0;
         let activeMultiplier = 0; let currentCalculatedMultiplier = 0;
@@ -290,10 +291,10 @@
 
         async function loadStats() {
             try {
-                let resKader = await fetch(`${SUPABASE_URL}/master_kader?select=nik`, { method: 'HEAD', headers: headersConfig });
+                let resKader = await fetch(`${SUPABASE_URL}/master_kader?select=nik`, { method: 'HEAD', headers: countHeaders });
                 document.getElementById('statKreator').innerText = resKader.headers.get('content-range') ? resKader.headers.get('content-range').split('/')[1] : 0;
 
-                let resSub = await fetch(`${SUPABASE_URL}/submissions?status=eq.approved&select=id`, { method: 'HEAD', headers: headersConfig });
+                let resSub = await fetch(`${SUPABASE_URL}/submissions?status=eq.approved&select=id`, { method: 'HEAD', headers: countHeaders });
                 document.getElementById('statKarya').innerText = resSub.headers.get('content-range') ? resSub.headers.get('content-range').split('/')[1] : 0;
             } catch(e) { console.error("Error stat:", e); }
         }
