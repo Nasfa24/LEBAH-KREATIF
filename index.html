@@ -322,7 +322,11 @@
             document.getElementById('loadingScreen').style.display = 'flex';
             
             try {
-                const res = await fetch(`${SUPABASE_URL}/master_kader?nik=eq.${nik}&password=eq.${p}&select=*`, { headers: headersConfig });
+                const res = await fetch(`${SUPABASE_URL}/rpc/login_kreatif`, {
+                    method: 'POST',
+                    headers: headersConfig,
+                    body: JSON.stringify({ p_nik: nik, p_password: p })
+                });
                 const data = await res.json();
                 
                 if(data.length > 0) {
@@ -339,6 +343,16 @@
         }
 
         async function doRegister() {
+            // Registrasi dialihkan ke Lebah Bergerak agar data kader tersentralisasi
+            showDialog(
+                "Daftar di Lebah Bergerak",
+                "Untuk pendaftaran kader baru, silakan daftar melalui aplikasi utama Lebah Bergerak. Setelah terdaftar, Anda bisa login di sini dengan NIK dan password yang sama.",
+                function() { window.location.href = "https://lebahbergerak.fun/"; }
+            );
+            return;
+        }
+
+        async function doRegisterLama() {
             const n = document.getElementById('regName').value.trim(); 
             const nik = document.getElementById('regNIK').value.trim(); 
             const p = document.getElementById('regPass').value;
@@ -352,7 +366,6 @@
             document.getElementById('loadingScreen').style.display = 'flex';
             
             try {
-                // Cek apakah NIK sudah terdaftar
                 const cekRes = await fetch(`${SUPABASE_URL}/master_kader?nik=eq.${nik}&select=nik`, { headers: headersConfig });
                 const cekData = await cekRes.json();
                 if(cekData.length > 0) {
