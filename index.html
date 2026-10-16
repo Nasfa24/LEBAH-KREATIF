@@ -322,7 +322,7 @@
             document.getElementById('loadingScreen').style.display = 'flex';
             
             try {
-                const res = await fetch(`${SUPABASE_URL}/rpc/login_kreatif`, {
+                const res = await fetch(`${SUPABASE_URL}/rpc/login_kreatif_v2`, {
                     method: 'POST',
                     headers: headersConfig,
                     body: JSON.stringify({ p_nik: nik, p_password: p })
