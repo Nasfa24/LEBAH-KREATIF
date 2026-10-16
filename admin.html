@@ -217,7 +217,11 @@
 
             try {
                 // Fetch data dari tabel master_admin berdasarkan input
-                const res = await fetch(`${SUPABASE_URL}/master_admin?username=eq.${u}&password=eq.${p}&select=*`, { headers: headersConfig });
+                const res = await fetch(`${SUPABASE_URL}/rpc/verify_admin_v2`, {
+                    method: 'POST',
+                    headers: headersConfig,
+                    body: JSON.stringify({ p_username: u, p_password: p })
+                });
                 const data = await res.json();
 
                 if (data.length > 0) {
