@@ -303,7 +303,7 @@
                 if(dataList.length === 0) { div.innerHTML = "<p style='text-align:center;'>Hore! Tidak ada antrian validasi.</p>"; return; }
 
                 dataList.forEach(d => {
-                    const dateStr = new Date(d.created_at).toLocaleString();
+                    const dateStr = d.created_at ? new Date(d.created_at).toLocaleString('id-ID') : 'Baru saja';
                     let typeBadge = `<span class="badge" style="background:#E3F2FD; color:#1976D2;">KARYA BARU</span>`;
                     let borderStyle = "card-pending"; let oldPtsText = "";
 
@@ -318,7 +318,7 @@
                     div.innerHTML += `
                         <div class="card ${borderStyle}">
                             <div style="flex-grow:1;">
-                                <b>${d.user_name}</b> ${typeBadge} <span class="badge">${d.platform.toUpperCase()}</span><br>
+                                <b>${d.user_name || 'Tanpa Nama'}</b> ${typeBadge} <span class="badge">${(d.platform || 'lain').toUpperCase()}</span><br>
                                 <div style="font-size:0.8rem; color:#666; margin:2px 0;">${dateStr}</div>
                                 ${oldPtsText}
                                 <div style="margin-top:5px; margin-bottom:10px;">
@@ -478,7 +478,7 @@
             let delta = finalPoints - oldScore;
 
             try {
-                await fetch(`${SUPABASE_URL}/submissions?id=eq.${currentDocId}`, {
+                const patchRes = await fetch(`${SUPABASE_URL}/submissions?id=eq.${currentDocId}`, {
                     method: 'PATCH', headers: headersConfig, 
                     body: JSON.stringify({ 
                         status: newStatus, 
@@ -488,6 +488,11 @@
                     })
                 });
 
+                if (!patchRes.ok) {
+                    const errData = await patchRes.json().catch(() => ({}));
+                    throw new Error(errData.message || `HTTP ${patchRes.status}`);
+                }
+
                 if(delta !== 0) {
                     await updateUserBalance(currentUserId, delta);
                 }
@@ -496,7 +501,11 @@
                 showToast(`Selesai! Saldo disesuaikan (${delta > 0 ? '+'+delta : delta} Poin).`);
                 initDashboard(); 
             } catch(e) {
-                showDialog("Error", "Gagal menyimpan penilaian.", null, true);
+                console.error('submitGrade error:', e);
+                showDialog("Gagal Simpan", "Penilaian tidak tersimpan: " + e.message + "\n\nHubungi admin sistem.", null, true);
+                document.getElementById('btnApprove').disabled = false;
+                document.getElementById('btnTolak').disabled = false;
+                document.getElementById('btnApprove').innerHTML = '<i class="fas fa-check"></i> Simpan & Approve';
             } finally {
                 document.getElementById('btnApprove').disabled = false; document.getElementById('btnTolak').disabled = false;
                 document.getElementById('btnApprove').innerHTML = `<i class="fas fa-check"></i> Simpan & Approve`;
