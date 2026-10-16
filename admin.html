@@ -190,11 +190,39 @@
         let currentDocId = null; let currentUserId = null; let oldScore = 0;
         let activeMultiplier = 0; let currentCalculatedMultiplier = 0;
 
-        window.onload = function() { 
+        window.onload = async function() { 
+            const urlParams = new URLSearchParams(window.location.search);
+            const tokenFromUrl = urlParams.get('token');
+
+            if (tokenFromUrl) {
+                try {
+                    const resToken = await fetch(`${SUPABASE_URL}/rpc/verify_admin_token`, {
+                        method: 'POST',
+                        headers: headersConfig,
+                        body: JSON.stringify({ p_token: tokenFromUrl })
+                    });
+                    const dataToken = await resToken.json();
+
+                    if (dataToken.valid) {
+                        sessionStorage.setItem('gclAdminLoggedIn', 'true');
+                        sessionStorage.setItem('gclAdminName', dataToken.nama_admin);
+                        const newUrl = window.location.pathname;
+                        window.history.replaceState({}, document.title, newUrl);
+                        window.location.reload();
+                        return;
+                    } else {
+                        Swal.fire('Token Tidak Valid', dataToken.reason || 'Token sudah kedaluwarsa atau dipakai.', 'error');
+                        const newUrl = window.location.pathname;
+                        window.history.replaceState({}, document.title, newUrl);
+                    }
+                } catch(e) {
+                    console.error('Token verification error:', e);
+                }
+            }
+
             if (sessionStorage.getItem('gclAdminLoggedIn') === 'true') { 
                 document.getElementById('loginOverlay').style.display = 'none'; 
                 document.getElementById('dashboard').style.display = 'block';
-                // Tampilkan nama admin jika ada
                 const adminName = sessionStorage.getItem('gclAdminName');
                 if(adminName) document.getElementById('adminWelcomeName').innerText = adminName;
                 initDashboard(); 
